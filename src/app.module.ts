@@ -6,7 +6,7 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/ananas_db'),
+    MongooseModule.forRoot('mongodb://localhost/annanas_db'),
     UserModule,
   ],
   controllers: [AppController],
