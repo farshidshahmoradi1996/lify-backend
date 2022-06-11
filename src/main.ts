@@ -17,8 +17,8 @@ async function bootstrap() {
   //config swagger
 
   const config = new DocumentBuilder()
-    .setTitle('JobYob')
-    .setDescription('JobYob API description')
+    .setTitle('ananas')
+    .setDescription('ananas API description')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
