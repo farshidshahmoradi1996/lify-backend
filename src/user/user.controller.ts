@@ -11,7 +11,7 @@ import {
   Res,
   UsePipes,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { JoiValidationPipe } from 'src/joi-validation-pipe.pipe';
@@ -30,23 +30,11 @@ export class UserController {
   @UsePipes(new JoiValidationPipe(UserValidationSchema))
   @ApiCreatedResponse({
     status: HttpStatus.CREATED,
-    description: 'new user saved successfully',
+    description: 'new user saved successfully.',
     type: User,
   })
-  async create(
-    @Res() response: Response,
-    @Body() createUserDto: CreateUserDto,
-  ) {
-    const findByEmail = await this.userService.findByEmail(createUserDto.email);
-    if (findByEmail) {
-      throw new HttpException('ایمیل قبلا ثبت شده است', HttpStatus.BAD_REQUEST);
-    }
-    const result = await this.userService.create(createUserDto);
-    if (result)
-      response
-        .status(HttpStatus.CREATED)
-        .json(Object.assign(result, { password: undefined }));
-    else throw new HttpException('Error', HttpStatus.INTERNAL_SERVER_ERROR);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 
   @Get()

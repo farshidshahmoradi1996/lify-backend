@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,12 +10,20 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto) {
+    //check email
+    const findByEmail = await this.findByEmail(createUserDto.email);
+    if (findByEmail) {
+      throw new HttpException('ایمیل قبلا ثبت شده است', HttpStatus.BAD_REQUEST);
+    }
+
     const createdUser = new this.userModel({
       ...createUserDto,
       created_at: new Date().toISOString(),
       password: this.createHashedPassword(createUserDto.password),
     });
-    return createdUser.save();
+    await createdUser.save();
+    createdUser.password = undefined;
+    return createdUser;
   }
 
   findAll() {
