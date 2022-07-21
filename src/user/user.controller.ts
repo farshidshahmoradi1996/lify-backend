@@ -3,22 +3,18 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
   HttpStatus,
   Param,
   Patch,
   Post,
-  Res,
   UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { ApiCreatedResponse, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 
-import { JoiValidationPipe } from 'src/joi-validation-pipe.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserValidationSchema } from './schemas/user-validation.schema';
-import { User } from './schemas/user.schema';
+
 import { UserService } from './user.service';
 
 @ApiTags('user')
@@ -27,17 +23,26 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register_user')
-  @UsePipes(new JoiValidationPipe(UserValidationSchema))
+  @UsePipes(new ValidationPipe())
   @ApiCreatedResponse({
     status: HttpStatus.CREATED,
     description: 'new user saved successfully.',
-    type: User,
+    schema: { type: 'object', example: {} },
   })
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Get()
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    description: 'get all users',
+    schema: {
+      type: 'object',
+      example: { data: { name: 'sdsdsmjjsdsssdsdsdsdsdss' } },
+      properties: { id: {} },
+    },
+  })
   findAll() {
     return this.userService.findAll();
   }

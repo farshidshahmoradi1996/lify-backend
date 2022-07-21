@@ -1,42 +1,49 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ApiProperty } from '@nestjs/swagger';
-
+import { IsEmail } from 'class-validator';
 export type UserDocument = User & Document;
 export enum USER_ROLE {
   ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE',
   USER = 'USER',
 }
 @Schema()
 export class User {
-  @ApiProperty()
   @Prop()
   email: string;
 
   @Prop()
   password: string;
 
-  @ApiProperty()
   @Prop()
   created_at: string;
 
-  @ApiProperty()
   @Prop()
   updated_at: string;
 
-  @ApiProperty()
   @Prop()
   name: string;
 
-  @ApiProperty()
   @Prop(USER_ROLE)
   role: USER_ROLE;
+
+  @Prop()
+  image_url: string;
+
+  @Prop()
+  headline: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-//on save document update \updated_at\ automatically
+//on save document update "updated_at" automatically
 UserSchema.pre('save', function (next) {
   this.updated_at = new Date().toISOString();
   next();
+});
+UserSchema.set('toJSON', {
+  versionKey: false,
+  transform(doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.password;
+  },
 });

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,6 +10,9 @@ async function bootstrap() {
   //middleware
   app.enableCors();
   app.use(helmet());
+
+  //auto validation
+  app.useGlobalPipes(new ValidationPipe());
 
   //config swagger
   const swaggerConfig = new DocumentBuilder()
