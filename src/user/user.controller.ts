@@ -11,26 +11,25 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { ApiExtraModels, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { ApiResponseSchema } from 'src/shared/decorators/api-response-schema';
+import { PaginatedDto } from 'src/shared/dto/paginated-response.dto';
+import { ResponseSchemaDto } from 'src/shared/dto/response-schema.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserSchema } from './schemas/user.schema';
-
+import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
 
-@ApiTags('user')
-@Controller('user')
+@ApiTags('users')
+@Controller('users')
+@ApiExtraModels(User, PaginatedDto, ResponseSchemaDto)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register_user')
   @UsePipes(new ValidationPipe())
-  @ApiCreatedResponse({
-    description: 'new user saved successfully.',
-    schema: { type: 'object', example: {} },
-    type: User,
-  })
+  @ApiResponseSchema(User)
   async create(@Body() user: CreateUserDto) {
     //check email
     const findByEmail = await this.userService.findByEmail(user.email);

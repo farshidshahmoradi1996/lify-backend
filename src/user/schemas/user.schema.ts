@@ -1,12 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { CreateUserDto } from '../dto/create-user.dto';
 
 export type UserDocument = User & Document;
-export enum USER_ROLE {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+
+export enum UserRole {
+  Admin = 'Admin',
+  User = 'User',
 }
+
 @Schema()
+@ApiExtraModels()
 export class User {
+  @ApiProperty()
+  @Prop()
+  name: string;
+
+  @ApiProperty()
   @Prop()
   email: string;
 
@@ -14,21 +24,23 @@ export class User {
   password: string;
 
   @Prop()
+  @ApiProperty({ required: false })
   created_at: string;
 
   @Prop()
+  @ApiProperty({ required: false })
   updated_at: string;
 
-  @Prop()
-  name: string;
-
-  @Prop(USER_ROLE)
-  role: USER_ROLE;
+  @Prop(UserRole)
+  @ApiProperty({ required: false, enum: UserRole })
+  role: UserRole;
 
   @Prop()
+  @ApiProperty({ required: false })
   image_url: string;
 
   @Prop()
+  @ApiProperty({ required: false })
   headline: string;
 }
 
@@ -37,6 +49,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 //on save document update "updated_at" automatically
 UserSchema.pre('save', function (next) {
   this.updated_at = new Date().toISOString();
+  if (!this.role) this.role = UserRole.User;
   next();
 });
 
