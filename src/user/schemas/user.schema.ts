@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsEmail } from 'class-validator';
+
 export type UserDocument = User & Document;
 export enum USER_ROLE {
   ADMIN = 'ADMIN',
@@ -39,6 +39,7 @@ UserSchema.pre('save', function (next) {
   this.updated_at = new Date().toISOString();
   next();
 });
+
 UserSchema.set('toJSON', {
   versionKey: false,
   transform(doc, ret) {

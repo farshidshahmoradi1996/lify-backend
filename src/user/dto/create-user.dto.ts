@@ -15,10 +15,4 @@ export class CreateUserDto {
   @ApiProperty()
   @IsString()
   name: string;
-
-  @ApiProperty({ required: false })
-  image_url: string;
-
-  @ApiProperty({ required: false })
-  headline: string;
 }

@@ -4,8 +4,8 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TransformInterceptor } from './shared/interceptor/transform.interceptor';
-import { TimeoutInterceptor } from './shared/interceptor/timeout.interceptor';
+import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
+import { TimeoutInterceptor } from './shared/interceptors/timeout.interceptor';
 
 @Module({
   imports: [MongooseModule.forRoot('mongodb://localhost/lify_db'), UserModule],

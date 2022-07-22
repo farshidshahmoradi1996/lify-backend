@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   HttpStatus,
   Param,
   Patch,
@@ -14,6 +15,7 @@ import { ApiCreatedResponse, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User, UserSchema } from './schemas/user.schema';
 
 import { UserService } from './user.service';
 
@@ -25,12 +27,17 @@ export class UserController {
   @Post('register_user')
   @UsePipes(new ValidationPipe())
   @ApiCreatedResponse({
-    status: HttpStatus.CREATED,
     description: 'new user saved successfully.',
     schema: { type: 'object', example: {} },
+    type: User,
   })
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() user: CreateUserDto) {
+    //check email
+    const findByEmail = await this.userService.findByEmail(user.email);
+    if (findByEmail) {
+      throw new HttpException('ایمیل قبلا ثبت شده است', HttpStatus.BAD_REQUEST);
+    }
+    return this.userService.create(user);
   }
 
   @Get()
