@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseSchemaDto<TData> {
-  data: TData;
+  result: TData;
 
   @ApiProperty()
   message: string;

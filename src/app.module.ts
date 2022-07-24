@@ -6,9 +6,16 @@ import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
 import { TimeoutInterceptor } from './shared/interceptors/timeout.interceptor';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://localhost/lify_db'), UserModule],
+  imports: [
+    MongooseModule.forRoot('mongodb://localhost/lify_db'),
+    UserModule,
+    AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,

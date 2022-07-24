@@ -19,7 +19,7 @@ export class TransformInterceptor<T>
   ): Observable<ResponseSchemaDto<T>> {
     return next.handle().pipe(
       map((data) => ({
-        data,
+        result: data,
         message: '',
         statusCode: 200,
       })),

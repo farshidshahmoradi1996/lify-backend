@@ -6,6 +6,8 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  //get app port
+  const port = process.env.PORT;
 
   //middleware
   app.enableCors();
@@ -16,6 +18,7 @@ async function bootstrap() {
 
   //config swagger
   const swaggerConfig = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('lify')
     .setDescription('lify API description')
     .setVersion('1.0')
@@ -24,7 +27,8 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, swaggerDocument);
 
   //start app
-  await app.listen(3000);
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}/swagger`);
 }
 
 bootstrap();

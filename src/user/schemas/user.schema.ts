@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
 export type UserDocument = User & Document;
 
@@ -10,17 +9,20 @@ export enum UserRole {
 }
 
 @Schema()
-@ApiExtraModels()
 export class User {
   @ApiProperty()
   @Prop()
+  id: string;
+
+  @ApiProperty()
+  @Prop({ required: true })
   name: string;
 
   @ApiProperty()
-  @Prop()
+  @Prop({ required: true })
   email: string;
 
-  @Prop()
+  @Prop({ required: true })
   password: string;
 
   @Prop()
