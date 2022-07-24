@@ -61,6 +61,7 @@ export class UserService {
     const payload = {
       email: user.email,
       role: user.role,
+      sub: user._id,
     };
 
     return {

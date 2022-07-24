@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import * as mongoose from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -10,8 +11,10 @@ export enum UserRole {
 
 @Schema()
 export class User {
+  _id: mongoose.Types.ObjectId;
+
   @ApiProperty()
-  @Prop()
+  @Prop({ type: mongoose.Types.ObjectId })
   id: string;
 
   @ApiProperty()

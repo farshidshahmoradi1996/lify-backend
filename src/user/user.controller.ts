@@ -11,6 +11,7 @@ import { ApiBearerAuth, ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 import { ApiResponseSchema } from 'src/shared/decorators/api-response-schema';
+import { UserReq } from 'src/shared/decorators/user.decorator';
 
 import { PaginatedDto } from 'src/shared/dto/paginated-response.dto';
 import { ResponseSchemaDto } from 'src/shared/dto/response-schema.dto';
@@ -47,7 +48,7 @@ export class UserController {
   @Get('profile')
   @ApiResponseSchema(User)
   @UseGuards(JwtAuthGuard)
-  async profile() {
-    return {};
+  async profile(@UserReq() user: User) {
+    return user;
   }
 }
