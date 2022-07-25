@@ -8,6 +8,7 @@ import { TransformInterceptor } from './shared/interceptors/transform.intercepto
 import { TimeoutInterceptor } from './shared/interceptors/timeout.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
     MongooseModule.forRoot(process.env.DATABASE_CONNECTION_STRING),
     UserModule,
     AuthModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [
