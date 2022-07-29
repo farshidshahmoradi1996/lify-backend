@@ -14,7 +14,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ApiBearerAuth, ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { BlogPost } from './schemas/post.schema';
+import { BlogPost } from './schemas/blog-post.schema';
 import { ApiResponseSchema } from 'src/shared/decorators/api-response-schema';
 import { ApiPaginatedResponse } from 'src/shared/decorators/api-paginated-response';
 import { UserReq } from 'src/shared/decorators/user.decorator';
@@ -48,12 +48,19 @@ export class PostController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
+  @ApiResponseSchema(BlogPost)
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+    @UserReq() user: User,
+  ) {
+    return this.postService.update(id, updatePostDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  remove(@Param('id') id: string, @UserReq() user: User) {
+    return this.postService.remove(id, user);
   }
 }

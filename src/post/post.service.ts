@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PaginatedQuery } from 'src/shared/dto/paginated-query.dto';
 import { PaginatedResponseSchema } from 'src/shared/dto/paginated-response-schema.dto';
-import { PaginatedDto } from 'src/shared/dto/paginated-response.dto';
-import { getPaginationData } from 'src/shared/helpers/get-pagination-data.helper';
-import { User } from 'src/user/schemas/user.schema';
+
+import { getPaginationMetaData } from 'src/shared/helpers/get-pagination-data.helper';
+import { User, UserRole } from 'src/user/schemas/user.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PostDocument, BlogPost } from './schemas/post.schema';
+import { PostDocument, BlogPost } from './schemas/blog-post.schema';
 
 @Injectable()
 export class PostService {
@@ -29,33 +29,84 @@ export class PostService {
   async findAll(
     paginationData: PaginatedQuery,
   ): Promise<PaginatedResponseSchema<BlogPost[]>> {
-    const count = await this.postModel.countDocuments();
-    const { pageNumber, skip, take, totalPages } = getPaginationData(
-      paginationData,
-      count,
-    );
-    const posts = await this.postModel
-      .find()
-      .limit(take)
-      .skip(skip)
-      .populate('user');
+    const query = this.postModel.find({
+      deleted_at: { $in: [null, undefined] },
+    });
+    const count = await query.clone().countDocuments();
+    const { pageNumber, totalPages, hasNextPage, take, skip } =
+      getPaginationMetaData(paginationData, count);
+    const posts = await query.limit(take).skip(skip).populate('user');
 
     return {
       data: posts,
-      pagination_meta: { pageNumber, take, totalPages, count },
+      pagination_meta: { pageNumber, take, totalPages, count, hasNextPage },
     };
   }
 
   async findOne(id: string) {
-    const findPost = await this.postModel.findById(id).populate('user');
-    return findPost;
+    const blogPost = await this.postModel
+      .findOne({ deleted_at: undefined, _id: id })
+      .populate('user');
+    if (!blogPost)
+      throw new HttpException('پست یافت نشد', HttpStatus.NOT_FOUND);
+
+    return blogPost;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: string, updatePostDto: UpdatePostDto, user: User) {
+    const blogPost = await this.postModel.findById(id);
+
+    //check post exists
+    if (!blogPost)
+      throw new HttpException('پست یافت نشد .', HttpStatus.BAD_REQUEST);
+
+    //check delete post
+    if (blogPost.deleted_at)
+      throw new HttpException('پست حذف شده است .', HttpStatus.BAD_REQUEST);
+
+    //check user access
+    const isSameUser = blogPost.user._id.toString() === user._id.toString();
+
+    if (user.role !== UserRole.Admin && !isSameUser)
+      throw new HttpException(
+        'شما دسترسی ویرایش ندارید .',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    //update post
+    await blogPost.updateOne({
+      $set: { ...updatePostDto, updated_at: new Date().toISOString() },
+    });
+
+    //show updated
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: string, user: User) {
+    const blogPost = await this.postModel.findById(id);
+
+    //check post exists
+    if (!blogPost)
+      throw new HttpException('پست یافت نشد .', HttpStatus.BAD_REQUEST);
+
+    //check delete post
+    if (blogPost.deleted_at)
+      throw new HttpException('پست حذف شده است .', HttpStatus.BAD_REQUEST);
+
+    //check user access
+    const isSameUser = blogPost.user._id.toString() === user._id.toString();
+
+    if (user.role !== UserRole.Admin && !isSameUser)
+      throw new HttpException(
+        'شما دسترسی ویرایش ندارید .',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    //delete post
+    await blogPost.updateOne({
+      $set: { deleted_at: new Date().toISOString() },
+    });
+
+    throw new HttpException('پست حذف شد', HttpStatus.OK);
   }
 }

@@ -12,4 +12,7 @@ export class PaginatedDto {
 
   @ApiProperty()
   count: number;
+
+  @ApiProperty()
+  hasNextPage: boolean;
 }

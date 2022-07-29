@@ -2,19 +2,9 @@ import { Prop } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class CreatePostDto {
+export class UpdateCommentDto {
   @ApiProperty()
-  @Prop()
   @IsString()
-  title: string;
-
-  @ApiProperty()
   @Prop()
-  @IsString()
   content: string;
-
-  @ApiProperty({ required: false })
-  @Prop()
-  @IsString()
-  image_url: string;
 }

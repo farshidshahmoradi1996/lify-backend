@@ -21,20 +21,20 @@ export class BlogPost {
   @Prop()
   content: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @Prop()
   image_url: string;
 
   @ApiProperty()
   @Prop({ required: true })
-  created_at: string;
+  created_at: Date;
 
   @ApiProperty()
   @Prop()
-  updated_at: string;
+  updated_at: Date;
 
   @Prop()
-  deleted_at: string;
+  deleted_at: Date;
 
   @ApiProperty()
   @Prop({ type: Number, default: 0 })
