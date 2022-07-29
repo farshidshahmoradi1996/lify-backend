@@ -6,6 +6,7 @@ import { PaginatedResponseSchema } from 'src/shared/dto/paginated-response-schem
 
 import { getPaginationMetaData } from 'src/shared/helpers/get-pagination-data.helper';
 import { User, UserRole } from 'src/user/schemas/user.schema';
+import { ChangeLikeStatusDto } from './dto/change-like-status.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostDocument, BlogPost } from './schemas/blog-post.schema';
@@ -37,20 +38,34 @@ export class PostService {
       getPaginationMetaData(paginationData, count);
     const posts = await query.limit(take).skip(skip).populate('user');
 
+    //transform data
+    const data = posts.map((item) => ({
+      ...item.toJSON(),
+      like_count: Array.isArray(item.liked_users) ? item.liked_users.length : 0,
+      liked_users: undefined,
+    }));
+
     return {
-      data: posts,
+      data,
       pagination_meta: { pageNumber, take, totalPages, count, hasNextPage },
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<BlogPost> {
     const blogPost = await this.postModel
       .findOne({ deleted_at: undefined, _id: id })
       .populate('user');
     if (!blogPost)
       throw new HttpException('پست یافت نشد', HttpStatus.NOT_FOUND);
+    const data = blogPost.toJSON();
+    data.like_count = Array.isArray(data.liked_users)
+      ? data.liked_users.length
+      : 0;
 
-    return blogPost;
+    //remove liked_users property in response
+    data.liked_users = undefined;
+
+    return data;
   }
 
   async update(id: string, updatePostDto: UpdatePostDto, user: User) {
@@ -108,5 +123,45 @@ export class PostService {
     });
 
     throw new HttpException('پست حذف شد', HttpStatus.OK);
+  }
+
+  async changeLikeStatus(changeLikeStatusDto: ChangeLikeStatusDto, user: User) {
+    const post = await this.postModel.findById(changeLikeStatusDto.postId);
+
+    if (!post || post.deleted_at)
+      throw new HttpException('پست یافت نشد', HttpStatus.BAD_REQUEST);
+
+    const userLikedPost = post.liked_users.includes(user._id.toString());
+    if (changeLikeStatusDto.like) {
+      //like post
+      if (userLikedPost) {
+        throw new HttpException(
+          'شما قبلا این پست رو لایک کردید .',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        await post.updateOne({
+          $set: { liked_users: [...post.liked_users, user._id.toString()] },
+        });
+      }
+    } else {
+      //dislike post
+      if (!userLikedPost) {
+        throw new HttpException(
+          'شما این پست رو لایک نکرده بودید',
+          HttpStatus.BAD_REQUEST,
+        );
+      } else {
+        await post.updateOne({
+          $set: {
+            liked_users: post.liked_users.filter(
+              (item) => item.toString() !== user._id.toString(),
+            ),
+          },
+        });
+      }
+    }
+
+    return this.findOne(post._id.toString());
   }
 }

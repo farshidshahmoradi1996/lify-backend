@@ -20,6 +20,7 @@ import { ApiPaginatedResponse } from 'src/shared/decorators/api-paginated-respon
 import { UserReq } from 'src/shared/decorators/user.decorator';
 import { User } from 'src/user/schemas/user.schema';
 import { PaginatedQuery } from 'src/shared/dto/paginated-query.dto';
+import { ChangeLikeStatusDto } from './dto/change-like-status.dto';
 
 @ApiTags('posts')
 @ApiBearerAuth()
@@ -62,5 +63,14 @@ export class PostController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string, @UserReq() user: User) {
     return this.postService.remove(id, user);
+  }
+
+  @Post('change_like_status')
+  @UseGuards(JwtAuthGuard)
+  changeLikeStatus(
+    @Body() changeLikeStatusDto: ChangeLikeStatusDto,
+    @UserReq() user: User,
+  ) {
+    return this.postService.changeLikeStatus(changeLikeStatusDto, user);
   }
 }

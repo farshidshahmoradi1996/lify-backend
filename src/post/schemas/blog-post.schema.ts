@@ -37,12 +37,14 @@ export class BlogPost {
   deleted_at: Date;
 
   @ApiProperty()
-  @Prop({ type: Number, default: 0 })
   like_count: number;
 
   @ApiProperty()
   @Prop({ type: mongoose.Types.ObjectId, ref: 'User', required: true })
   user: User;
+
+  @Prop({ type: [mongoose.Types.ObjectId], required: false, default: [] })
+  liked_users?: string[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(BlogPost);
