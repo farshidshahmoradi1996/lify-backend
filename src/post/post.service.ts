@@ -38,15 +38,8 @@ export class PostService {
       getPaginationMetaData(paginationData, count);
     const posts = await query.limit(take).skip(skip).populate('user');
 
-    //transform data
-    const data = posts.map((item) => ({
-      ...item.toJSON(),
-      like_count: Array.isArray(item.liked_users) ? item.liked_users.length : 0,
-      liked_users: undefined,
-    }));
-
     return {
-      data,
+      data: posts,
       pagination_meta: { pageNumber, take, totalPages, count, hasNextPage },
     };
   }
@@ -58,12 +51,6 @@ export class PostService {
     if (!blogPost)
       throw new HttpException('پست یافت نشد', HttpStatus.NOT_FOUND);
     const data = blogPost.toJSON();
-    data.like_count = Array.isArray(data.liked_users)
-      ? data.liked_users.length
-      : 0;
-
-    //remove liked_users property in response
-    data.liked_users = undefined;
 
     return data;
   }

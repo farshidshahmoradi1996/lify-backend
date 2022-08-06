@@ -40,6 +40,9 @@ export class BlogPost {
   like_count: number;
 
   @ApiProperty()
+  liked_counts: number;
+
+  @ApiProperty()
   @Prop({ type: mongoose.Types.ObjectId, ref: 'User', required: true })
   user: User;
 
@@ -51,8 +54,14 @@ export const PostSchema = SchemaFactory.createForClass(BlogPost);
 
 PostSchema.set('toJSON', {
   versionKey: false,
+  virtuals: true,
   transform(doc, ret) {
     ret.id = ret._id;
     delete ret._id;
+    delete ret.liked_users;
   },
+});
+
+PostSchema.virtual('liked_counts').get(function () {
+  return Array.isArray(this.liked_users) ? this.liked_users.length : 0;
 });
